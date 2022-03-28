@@ -1,34 +1,71 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React,{useEffect, useState} from 'react';
+import { useSelector } from 'react-redux';
 
-//1. setup redux - DONE
-//2. install tailwind - TODO
-//3. create auth and dashboard ui using tailwind(basic) - TODO
-//4. complete redux functions
-//5. make zoom functionality and convert it to npm library
-//6. move towards gpu inference
-//7. integrate
-//8. fix issues
-//9. Improve UI to professional one
-//10. Create Microservice for auth
-//11. Create Microservice for inference
-//12. Use Jest Testing for inference
+import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route, Routes,Switch } from "react-router-dom";
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+import AppBar from "./components/AppBar";
+import Alert from '@mui/material/Alert';
+
+
+import ProtectedRoute from './components/ProtectedRoute';
+import Authentication from './Pages/Authentication';
+import Dashboard from './Pages/Dashboard';
+import ImageViewer from './Pages/ImageViewer';
+import Home from "./Pages/Home";
+
+
+
+function appBarLabel(label) {
+  return (
+    <Toolbar>
+      <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
+        <MenuIcon />
+      </IconButton>
+      <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+        {label}
+      </Typography>
+    </Toolbar>
+  );
 }
 
-export default App;
+function NotificationViewer(){
+  let notifications = useSelector((state)=>state.notifications);
+
+  return (
+    <div style={{position:'absolute',right:'30px',top:'80px'}}>
+      
+      <div style={{display:'flex',flexDirection:'column-reverse'}}>
+        {notifications.map(({id,notification,type}) => <Alert style={{minWidth:'400px',margin:'10px'}} key={id} severity={type} >{notification}</Alert>)}
+      </div>
+
+    </div>
+  );
+
+}
+
+
+
+export default function App() {
+
+
+
+
+  return (
+    
+    <>
+      <AppBar/>
+      <NotificationViewer/>
+
+      
+      <Router>
+        <Routes>
+        <Route exact path='/viewimage' element={<ProtectedRoute privelages={[0,1,2,3]} element={ImageViewer}/>} />
+          <Route exact path='/dashboard' element={<ProtectedRoute privelages={[0,1,2,3]} element={Dashboard}/>} />
+          <Route exact path='/home' element={<ProtectedRoute privelages={[0,1,2,3]} element={Home}/>}/>
+          <Route exact path="/" element={<Authentication/>} />
+        </Routes>
+      </Router>
+    </>
+  );
+}

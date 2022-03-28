@@ -1,5 +1,10 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
+body{
+
+    margin:0px;
+    background: rgb(254, 248, 221) none repeat scroll 0% 0%;
+}
+  
+
+.touchable:hover{
+    opacity: 0.9;
 }
