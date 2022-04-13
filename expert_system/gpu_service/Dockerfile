@@ -34,9 +34,6 @@ RUN echo "source activate hovernet" > ~/.bashrc \
 #line below is for running celery
 RUN echo 'export LC_ALL=C.UTF-8' >> ~/.bashrc  && echo 'export LANG=C.UTF-8' >> ~/.bashrc 
 
-RUN echo "echo 'service rabbitmq-server start and then run rabbitmqctl status to know port of rabbitmq. should be 5672' " >> ~/.bashrc 
-
-
-
-
+RUN echo "echo 'Run RabitMQ with service rabbitmq-server start. Check Status with rabbitmqctl status" >> ~/.bashrc 
+RUN echo "echo 'Run Celery Worker with celery -A background worker --loglevel=INF'" >> ~/.bashrc
 
