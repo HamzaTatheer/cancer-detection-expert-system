@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useReducer } from 'react';
 import { CircularProgress } from '@mui/material';
+import { showNotification } from "../../redux/actions/notification";
+import { useDispatch } from "react-redux";
 
 
 let Loading = ()=>{
@@ -20,18 +22,35 @@ let Loading = ()=>{
 //{Img ? Img : <Loading/>}
 export default function SvsViewer(props){
 
+    let dispatch = useDispatch();
+
     let {width,height,background} = props;
     background = background ? background : "white";
-    let {imageid,tileSize,XYcoordinate} = props;
+    let {getTile,x,y} = props;
     let [Img,setImg] = useState();
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+    //console.log(getTile);
 
     useEffect(()=>{
-    },[tileSize,XYcoordinate])
+
+        console.log(x);
+        console.log(y);
+
+        getTile(x,y).then((imgstr)=>{
+            setImg(imgstr);
+            forceUpdate();
+        }).catch((err)=>{
+            console.log(err)
+            dispatch(showNotification("Error Loading Image","error"));
+        });
+
+    },[x,y])
 
 
     return (
         <div style={{width:width,height:height,background,position:"relative"}}>
-            {props.img ? <img height="100%" width="100%" src={props.img}/> : <Loading/>}
+            <img height="100%" width="100%" key={Img} src={"data:image/png;base64,"+Img}/>
         </div>
     )
 

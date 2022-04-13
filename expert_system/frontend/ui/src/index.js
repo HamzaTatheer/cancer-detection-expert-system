@@ -15,7 +15,16 @@ import thunk from "redux-thunk";
 
 import { createTheme,ThemeProvider } from '@mui/material/styles';
 
-const theme = createTheme({});
+const theme = createTheme({
+  typography: {
+    fontFamily: [
+      "Nunito",
+      "Helvetica Neue",
+      "Arial",
+      "sans-serif"
+    ].join(",")
+  }
+});
 
 
 

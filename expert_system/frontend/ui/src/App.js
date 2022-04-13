@@ -33,7 +33,7 @@ function NotificationViewer(){
   let notifications = useSelector((state)=>state.notifications);
 
   return (
-    <div style={{position:'absolute',right:'30px',top:'80px'}}>
+    <div style={{position:'absolute',right:'30px',top:'80px',zIndex:"1000"}}>
       
       <div style={{display:'flex',flexDirection:'column-reverse'}}>
         {notifications.map(({id,notification,type}) => <Alert style={{minWidth:'400px',margin:'10px'}} key={id} severity={type} >{notification}</Alert>)}
