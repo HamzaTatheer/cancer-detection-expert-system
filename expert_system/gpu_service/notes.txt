@@ -1,0 +1,7 @@
+apt install vim
+apt-get install rabbitmq-server
+service rabbitmq-server start
+
+
+
+use rabbitmqctl status for status
