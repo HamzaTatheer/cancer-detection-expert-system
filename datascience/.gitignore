@@ -3,3 +3,6 @@
 /pmnet/pmnet_code/patches_temp/
 /pmnet/pmnet_dataset/bach/WSI/
 /pmnet/pmnet_dataset/dryad/WSI/
+hovernet_original_consep_type_tf2pytorch.tar
+hovernet_original_kumar_notype_tf2pytorch.tar
+hovernet_original_consep_notype_pytorch.tar
