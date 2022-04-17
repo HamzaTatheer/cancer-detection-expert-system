@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from flask import Flask
+from flask_redis import FlaskRedis
 from flask_cors import CORS
 from flask import request, make_response
 from werkzeug.utils import secure_filename
@@ -10,8 +11,17 @@ import jsonpickle
 import cv2
 import openslide
 from io import BytesIO
+from utils import convertPatchLocationToFileName,convertImageToString,convertStringToImage
+from PIL import Image
+import requests
+import json
 
 app = Flask(__name__)
+redis_client = FlaskRedis(app,decode_responses=True) #decode_response allows us to use string rather than bytes
+SCREEN_WIDTH=1366
+SCREEN_HEIGHT=768
+
+
 CORS(app, resource={
     r"/*":{
         "origins":"*"
@@ -48,10 +58,8 @@ def addPatientRecord():
         return make_response("Request does not have a body",400)
 
     try:
-        patientno = data['patientno']
         name = data['name']
         cnic = data['cnic']
-        status = data['status']
     except KeyError:
         return make_response("Please enter all valid patient record values",400);
 
@@ -60,7 +68,13 @@ def addPatientRecord():
 @app.route("/addPatientSvsFile",methods=['Post'])
 def addPatientSvsFile():
     data = request.get_json()
-    patientno = data['filename']
+    if(data == None):
+        return make_response("Request does not have a body",400)
+
+
+    name = data['name']
+    cnic = data['svs_file_name']
+
     return "Done"
 
 
@@ -105,13 +119,125 @@ def getSvsDimensions():
         filename = request.args.get("filename")
     except:
         return make_response("Please Provide File Name",400)
-
-
+    print("-------------")
+    print(filename)
+    print("-------------")
     wsi_path = 'data/svs_uploads/'+filename
     slide = openslide.OpenSlide(wsi_path)
     width = slide.dimensions[0]
     height = slide.dimensions[1]
     return make_response({"height":height,"width":width},200)
+
+#state
+#0-found in cache
+#1-starting rendering
+#2-still rendering
+#3-renderingResultAvailable
+
+
+@app.route("/getSvsPatchResult",methods=['GET'])
+def getSvsPatchResult():
+    data = request.get_json()
+
+    filename = request.args.get("filename")
+    x = request.args.get("x")
+    y = request.args.get("y")
+
+    print(request.args)
+
+    wsi_path = 'data/svs_uploads/'+filename
+    print(wsi_path)
+    slide = openslide.OpenSlide(wsi_path)
+    level = 0;
+    x = int(x)*SCREEN_WIDTH;
+    y = int(y)*SCREEN_HEIGHT;
+    patch_width = SCREEN_WIDTH;
+    patch_height = SCREEN_HEIGHT;
+
+    print(x)
+    print(y)
+
+    patch = slide.read_region(
+            (x, y),level,
+            (patch_width,patch_height)).convert('RGB')
+    
+    img_str = convertImageToString(patch)
+
+    #img_str = data["img_str"]
+    #patch = convertStringToImage(img_str,includes_metainfo=True)
+
+
+    if(filename == None):
+        return make_response("Please Provide File Name",400)
+
+
+    try:
+        x = request.args.get("x")
+        y = request.args.get("y")
+    except:
+        return make_response("Please Provide Coordinates",400)
+
+    filename = convertPatchLocationToFileName(filename,x,y)
+
+    files = os.listdir('data/patches/')
+    print(files)
+    print(filename)
+
+    if(filename in files):
+        print("Found File")
+        #convert img to string
+        img = Image.open('data/patches/'+filename)
+        img_str = convertImageToString(img)
+        response = jsonpickle.encode({"status":0,"img_str":"data:image/png;base64,"+img_str})
+        redis_client.delete(filename)#need to delete task as file is found
+        return make_response(response,200)
+    else:
+        #check in tasks assigned to gpu in redis
+        task_id = redis_client.get(filename)
+        print("0000000000000000")
+        print(filename)
+        print(task_id)
+        print("0000000000000000")
+        #if exists in redis
+        if task_id is not None:
+            #ask 111.68.102.120:32480/getInferenceResult
+            print("Calling API to get Image")
+            resp = requests.post(
+            "http://111.68.102.120:32480/getInferenceResult",
+            json={"task_id":task_id}
+            )
+
+            if resp.text == "Result Still Not Exists":
+                #return body with status of 0
+                response = jsonpickle.encode({"status":2,"status_msg":"still rendering"})
+                return make_response(response,200)
+            else:
+                #store image with filename in data/patches/
+                print("-------------------------------------------")
+                convertStringToImage(resp.text,includes_metainfo=True).save('data/patches/'+filename, format="PNG")
+                #return body with image and status of 3
+                response = jsonpickle.encode({"status":3,"img_str":resp.text})
+                return make_response(response,200)
+        else:
+            print("Calling API to create job of Image Inference")
+            #make request to api 111.68.102.120:32480/startInference
+
+            resp = requests.post(
+            "http://111.68.102.120:32480/startInference",
+            json={"img_name":filename,"img_str":"data:image/png;base64,"+convertImageToString(patch)}
+            )
+
+            print("-WOW-")
+            print(resp.text)
+            print(redis_client.set(filename,resp.text))
+            print("-WOW-")
+
+            response = jsonpickle.encode({"status":1,"status_msg":"Starting Rendering"})
+            return make_response(response,200)
+
+    return filename
+
+
 
 
 @app.route("/getSvsPatch",methods=['GET'])
@@ -135,10 +261,10 @@ def getSvsPatch():
     print(wsi_path)
     slide = openslide.OpenSlide(wsi_path)
     level = 0;
-    x = int(x)*1000;
-    y = int(y)*1000;
-    patch_width = 1000;
-    patch_height = 1000;
+    x = int(x)*SCREEN_WIDTH;
+    y = int(y)*SCREEN_HEIGHT;
+    patch_width = SCREEN_WIDTH;
+    patch_height = SCREEN_HEIGHT;
 
     print(x)
     print(y)
@@ -149,7 +275,7 @@ def getSvsPatch():
 
     buffered = BytesIO()
     img.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode()
+    img_str = "data:image/png;base64,"+base64.b64encode(buffered.getvalue()).decode()
     
     
     response = jsonpickle.encode({"tile":img_str})
@@ -188,7 +314,6 @@ def startView():
     #make average coord accordingly
     start_coord = {"x":0,"y":0};
     response = jsonpickle.encode({"thumbnail":encoded_thumbnail,"thumbnail_h":thumbnail_h,"thumbnail_w":thumbnail_w,"start_coord":start_coord})
-
     return make_response(response,200)
 
 

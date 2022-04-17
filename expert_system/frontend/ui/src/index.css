@@ -9,6 +9,31 @@ body{
     opacity: 0.9;
 }
 
+.fadeOnHover{
+    transition: opacity 1s linear;    
+}
+
+.fadeOnHover:hover{
+    opacity: 0.2;
+    transition: opacity 1s linear;
+}
+
+
+.grabbable {
+    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+ /* (Optional) Apply a "closed-hand" cursor during drag operation. */
+.grabbable:active {
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}
+
+
 .noselect {
     -webkit-touch-callout: none; /* iOS Safari */
       -webkit-user-select: none; /* Safari */

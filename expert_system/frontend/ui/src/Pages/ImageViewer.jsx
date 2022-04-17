@@ -14,25 +14,20 @@ import axios from "axios";
 import { useDispatch } from 'react-redux';
 import { showNotification } from '../redux/actions/notification';
 
-export default function ImageViewer(){
+export default function ImageViewer(props){
 
     let dispatch = useDispatch();
     let {state} = useLocation();
     let [dim,setDim] = useState();
-    
-    if(state == null){
-        state = {filename:"TCGA-HE-7130-01Z-00-DX1.1E46B522-6A18-4286-B84A-4C7FFD3B4833.svs"}
-    }
 
-    let filename = state.filename;
-
+    let filename = state !==null ? state.filename : "TCGA-18-5592-01Z-00-DX1.41BD6380-A3A0-4ED1-8752-42BBC3B4680C.svs";
 
     useEffect(()=>{
         axios.get("http://localhost:5000/getSvsDimensions",{  params: {
             filename
           }}).then(({data})=>{
             setDim({height:data.height,width:data.width});
-            console.log(data);
+            dispatch(showNotification("Viewing "+filename,"success"));            
         }).catch((err)=>{
             console.log(err);
             dispatch(showNotification("Can not Load Svs File","error"));

@@ -1,13 +1,19 @@
 import React from 'react';
 import { ArrowUpward,ArrowDownward,ArrowBack,ArrowForward } from '@mui/icons-material';
 import { Icon, IconButton } from '@mui/material';
+import Draggable from 'react-draggable';
+import { useState } from 'react';
 
 export default function SvsViewer(props){
 
-    return (
-        <>
+    let [opacity,setOpacity] = useState(1);
 
-        <div style={{position:"absolute",right:"150px",bottom:"100px",display:"flex",alignItems:'center',background:"white",boxShadow:"rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",padding:"10px"}}>
+
+    return (
+        <div style={{width:"100%",height:"100%",position:"absolute",display:"contents"}}>
+
+        <Draggable onStart={()=>setOpacity(0.8)} onStop={()=>setOpacity(1)} defaultPosition={{x: window.innerWidth - 300, y: window.innerHeight-300}} bounds={{left: 0, top: 0, right: window.innerWidth-200, bottom: window.innerHeight-300}}>
+        <div className='grabbable' style={{width:"fit-content",height:"fit-content",display:"flex",alignItems:'center',background:"white",boxShadow:"rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",padding:"10px",opacity,transition: "opacity 1s linear"}}>
             <IconButton onClick={()=> props.onClickLeft()}>
             <ArrowBack/>
             </IconButton>
@@ -25,7 +31,10 @@ export default function SvsViewer(props){
             <ArrowForward/>
             </IconButton>
         </div>
-        </>
+        </Draggable>
+
+
+        </div>
     )
 
 

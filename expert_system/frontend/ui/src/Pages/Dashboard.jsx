@@ -31,7 +31,7 @@ export default function Dashboard(){
 
 
     let data = [
-        {id:1,name:"Hamza Tatheer",cnic:"39241928337829",status:"uploaded",filename:"TCGA-HE-7130-01Z-00-DX1.1E46B522-6A18-4286-B84A-4C7FFD3B4833.svs",hasInference:true},
+        {id:1,name:"Hamza Tatheer",cnic:"39241928337829",status:"uploaded",filename:"TCGA-B0-5711-01Z-00-DX1.6839921f-ec08-4e94-8bf9-4b5a4fcdda45.svs",hasInference:true},
         {id:2,name:"Khizer Hayat",cnic:"34241928337829",status:"uploading",filename:"TCGA-HE-7130-01Z-00-DX1.1E46B522-6A18-4286-B84A-4C7FFD3B4833.svs",hasInference:true},
         {id:4,name:"Umair Hussain",cnic:"34241928337829",status:"inference done",filename:"TCGA-HE-7130-01Z-00-DX1.1E46B522-6A18-4286-B84A-4C7FFD3B4833.svs",hasInference:true},
         {id:5,name:"Muntazer Baig",cnic:"34241928337829",status:"inference done",filename:"TCGA-HE-7130-01Z-00-DX1.1E46B522-6A18-4286-B84A-4C7FFD3B4833.svs",hasInference:true},

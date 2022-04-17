@@ -37,6 +37,7 @@ export default function SvsViewer(props){
         console.log(x);
         console.log(y);
 
+        setImg(undefined)
         getTile(x,y).then((imgstr)=>{
             setImg(imgstr);
             forceUpdate();
@@ -50,7 +51,7 @@ export default function SvsViewer(props){
 
     return (
         <div style={{width:width,height:height,background,position:"relative"}}>
-            <img height="100%" width="100%" key={Img} src={"data:image/png;base64,"+Img}/>
+            {Img == undefined ? <Loading/> : <img height="100%" width="100%" key={Img} src={Img}/>}
         </div>
     )
 

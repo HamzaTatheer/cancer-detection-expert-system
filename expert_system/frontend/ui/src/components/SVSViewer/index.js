@@ -8,11 +8,11 @@ export default function SVSViewer(props){
 
     let {svs_width,svs_height} = props;
     
-    let [displayPos,setDisplayPos] = useState({x:window.innerWidth,y:0});
+    let [displayPos,setDisplayPos] = useState({x:window.innerWidth/2,y:0});
     let [mouseMovementStart,setMouseMovementStart] = useState(false);
     let [filename,setFileName] = useState(props.filename);
 
-    let [coordX,setCoordX] = useState(10);
+    let [coordX,setCoordX] = useState(30);
     let [coordY,setCoordY] = useState(30);
 
 
@@ -26,10 +26,101 @@ export default function SVSViewer(props){
     }
 
     let getInferenceTile = (x,y)=>{
-        return new Promise((res,rej)=>{
-            axios.get('http://localhost:5000/getSvsPatch',{params:{filename:filename,x:coordX,y:coordY}}).then(({data})=>{
-                res(data['tile']);
-            }).catch((err)=>rej(err))
+        return new Promise(async (res,rej)=>{
+
+            // #state
+            // #0-found in cache
+            // #1-starting rendering
+            // #2-still rendering
+            // #3-renderingResultAvailable
+            
+
+
+
+            await axios.get('http://localhost:5000/getSvsPatchResult',{params:{filename:filename,x:coordX,y:coordY}}).then(({data})=>{
+                let status = data['status']
+                
+
+                if(status == 0 || status == 3){
+                    res(data['img_str'])
+                }
+
+            })
+
+
+                let timer = setInterval(function funtimes(){
+
+                    axios.get('http://localhost:5000/getSvsPatchResult',{params:{filename:filename,x:coordX,y:coordY}}).then(({data})=>{
+                        let status = data['status']
+                        
+                        switch (status) {
+                            case 0:
+                                //return result
+                                console.log("Result: Found In Cache")
+                                res(data['img_str'])
+                                clearInterval(timer)
+                                break;
+                            case 1:
+                                //do nothing
+                                console.log("Result: Starting Rendering")
+                                break;
+                            case 2:
+                                //do nothing
+                                console.log("Result: Still Rendering")
+                                break;
+                            case 3:
+                                //return result
+                                console.log("Result: Rendered")
+                                res(data['img_str'])
+                                clearInterval(timer)
+                                break;
+                                
+                            default:
+                                console.log(status);
+                                break;
+                        }
+                    }).catch((err)=>rej(err))                
+                },10000);
+            
+
+            // let intervalId = setInterval(getInferedImage,30000);
+            // console.log("GOOOOOOOOOOOOOOOOOOOOOOD")
+            // console.log(intervalId)
+            // function getInferedImage(){
+            //     axios.get('http://localhost:5000/getSvsPatchResult',{params:{filename:filename,x:coordX,y:coordY}}).then(({data})=>{
+            //         let status = data['status']
+            //         console.log("DOING IT")
+            //         switch (status) {
+            //             case 0:
+            //                 //return result
+            //                 print("Result: Found In Cache")
+            //                 clearInterval(intervalId)
+            //                 break;
+            //             case 1:
+            //                 //do nothing
+            //                 print("Result: Starting Rendering")
+            //                 break;
+            //             case 2:
+            //                 //do nothing
+            //                 print("Result: Still Rendering")
+            //                 break;
+            //             case 3:
+            //                 //return result
+            //                 print("Result: Rendered")
+            //                 clearInterval(intervalId)
+            //                 break;
+                            
+            //             default:
+            //                 break;
+            //         }
+            //     }).catch((err)=>console.log(err))                
+            // }
+
+            // axios.get('http://localhost:5000/getSvsPatch',{params:{filename:filename,x:coordX,y:coordY}}).then(({data})=>{
+            //     res(data['tile']);
+            // }).catch((err)=>rej(err))
+        
+        
         });
     }
 
@@ -68,8 +159,17 @@ export default function SVSViewer(props){
         {JSON.stringify(mouseMovementStart)}
 
         return (
-            <div style={{position:"absolute",padding:"10px",zIndex:5000}}>
-            {" X:"+coordX + ",Y:"+coordY}
+            <div className="fadeOnHover" style={{position:"absolute",padding:"25px",margin:"20px",background:"white",zIndex:5000}}>
+            {"Displaying Row:"+coordX + " Col :"+coordY}
+                
+                <small>
+                <br/>
+                <br/>
+                Blue: epithelial<br/>
+                Red: inflammatory<br/>
+                Green: spindle-shaped<br/>
+                Cyan: miscellaneous<br/>
+                </small>
             </div>
         );
     }
@@ -84,10 +184,16 @@ export default function SVSViewer(props){
 
         <div style={{height:"inherit",position:"absolute",left:"0px",right:window.innerWidth - displayPos.x,overflow:"hidden"}}>
                 <ImagePatchDisplay alt="tile orignal" width="100vw" height="100%" background="#FEF8DD" getTile={getOrignalTile} x={coordX} y={coordY}/>
-                <div onMouseDown={()=>setMouseMovementStart(true)} style={{height:"100%",width:"10px",position:"absolute",top:"0px",right:"0px",background:"gray"}}/>
+                <div onMouseDown={()=>setMouseMovementStart(true)} style={{height:"100%",width:"10px",position:"absolute",top:"0px",right:"0px",background:"white",cursor:"col-resize",display:"flex",justifyContent:"center",alignItems:"center",boxShadow:"rgb(0, 0, 0) 0px 0px 20px"}}>
+                <div style={{fontWeight:"bold"}}>
+                    .<br/>.<br/>.
+                </div>
+                </div>
         </div>
 
-        <Controller onClickUp={handleUp} onClickDown={handleDown} onClickLeft={handleLeft} onClickRight={handleRight}/>
+        <Draggable>
+            <Controller onClickUp={handleUp} onClickDown={handleDown} onClickLeft={handleLeft} onClickRight={handleRight}/>
+        </Draggable>
         </div>
     )
 
