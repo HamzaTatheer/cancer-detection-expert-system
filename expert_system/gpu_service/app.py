@@ -13,7 +13,7 @@ from io import BytesIO
 import background
 from background import runInference
 from celery.result import AsyncResult
-
+from utils import convertImageToString
 
 app = Flask(__name__)
 CORS(app, resource={
@@ -44,10 +44,12 @@ def getInferenceResult():
     if (isReady):
         ans = result.get(5)
 
+
     if(ans == None):
         return "Result Still Not Exists"
 
 
+    #ans = convertImageToString(ans)
     return ans
 
 @app.route("/startInference",methods = ['POST'])

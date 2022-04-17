@@ -1,9 +1,17 @@
 import numpy as np
 import cv2
 import base64
+from io import BytesIO
+from PIL import Image
 
-def data_uri_to_cv2_img(uri):
-   encoded_data = uri.split(',')[1]
-   nparr = np.fromstring(base64.b64decode(encoded_data), np.uint8)
-   img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-   return img
+
+def convertStringToImage(base64_str):
+    base64_str = base64_str.split(',')[1]
+    return Image.open(BytesIO(base64.decodebytes(bytes(base64_str, "utf-8"))))
+
+
+def convertImageToString(img):
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    return img_str
