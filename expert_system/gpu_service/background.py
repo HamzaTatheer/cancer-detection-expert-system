@@ -18,7 +18,7 @@ def getInferedTile(img):
     #cv2.imwrite('input_dir/tile.png',img)
     img.save('input_dir/tile.png', format="PNG")
     
-    os.system("python /app/hover_net/run_infer.py --nr_types=5 --type_info_path=/app/shared/cancer-detection-expert-system/datascience/hovernet/type_info.json --model_path=/app/shared/cancer-detection-expert-system/datascience/hovernet_original_consep_type_tf2pytorch.tar --model_mode=original --batch_size=1 tile --input_dir=./input_dir --output_dir=./output_dir --draw_dot")
+    os.system("python /app/hover_net/run_infer.py --nr_types=5 --type_info_path=/shared/l181029/cancer-detection-expert-system/datascience/hovernet/type_info.json --model_path=/shared/l181029/cancer-detection-expert-system/datascience/hovernet_original_consep_type_tf2pytorch.tar --model_mode=original --batch_size=1 tile --input_dir=./input_dir --output_dir=./output_dir --draw_dot")
     
     #old without classification
     #os.system("python /app/hover_net/run_infer.py --type_info_path=hovernet_type_info.json --model_path=/app/shared/cancer-detection-expert-system/datascience/hovernet_original_consep_notype_pytorch.tar --model_mode=original --batch_size=1 tile --input_dir=./input_dir --output_dir=./output_dir --draw_dot")
