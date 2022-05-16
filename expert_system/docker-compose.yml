@@ -1,7 +1,7 @@
 version: '3.3'
 services:
-    flask_backend:
-        build: ./backend
+    hovernet_backend:
+        build: ./backend/hovernet_service
         ports:
             - "5000:5000"
         volumes:
