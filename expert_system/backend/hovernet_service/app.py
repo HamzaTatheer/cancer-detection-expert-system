@@ -52,34 +52,6 @@ def upload():
         else:
             return make_response({"uuid":filename},201);
 
-@app.route("/addPatientRecord",methods=['Post'])
-def addPatientRecord():
-
-    data = request.get_json()
-    if(data == None):
-        return make_response("Request does not have a body",400)
-
-    try:
-        name = data['name']
-        cnic = data['cnic']
-    except KeyError:
-        return make_response("Please enter all valid patient record values",400);
-
-    return "Done"
-
-@app.route("/addPatientSvsFile",methods=['Post'])
-def addPatientSvsFile():
-    data = request.get_json()
-    if(data == None):
-        return make_response("Request does not have a body",400)
-
-
-    name = data['name']
-    cnic = data['svs_file_name']
-
-    return "Done"
-
-
 @app.route("/getSvsThumbnail",methods=['Post'])
 def getSvsThumbnail():
 
